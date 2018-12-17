@@ -1,0 +1,63 @@
+from urllib.request import *
+from urllib.parse import *
+import time
+from bs4 import BeautifulSoup
+def shanghai():
+    start='2018-12-10'
+    end=str(time.gmtime().tm_year)+'-'+str(time.gmtime().tm_mon)+'-'+str(time.gmtime().tm_mday)
+    data={'start':start,'end':end}
+    data=urlencode(data).encode('utf-8')
+    res=Request(url='http://www.sge.com.cn/sjzx/everjzj',method='POST',data=data)
+    res.add_header('user-agent','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36')
+    html=urlopen(res).read().decode('utf-8')
+    html=html[html.find(r'<td align="center"><span')+10:html.find(r'<td align="center" ><a href',html.find(r'<td align="center"><span')+10)]
+    html=html[html.find(r'<td align="center">')+len(r'<td align="center">'):html.find(r'</td>',html.find(r'<td align="center">'))]
+    with open('D:\\data.txt','a') as f:
+        f.write(r'{"上海交易所":"'+html+'",')
+    print('上海交易所：'+html)
+def gongshang():
+    data = {'Area_code': '0200', 'trademode': '1','tranCode':'A00462'}
+    data = urlencode(data).encode('utf-8')
+    res = Request(url='https://mybank.icbc.com.cn/servlet/AsynGetDataServlet', method='POST', data=data)
+    res.add_header('user-agent',
+                   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36')
+    html = urlopen(res).read().decode('utf-8')
+    html=html[html.find(r'"middleprice":"')+len(r'"middleprice":"'):html.find(r'"',html.find(r'"middleprice":"')+len(r'"middleprice":"'))]
+    with open('D:\\data.txt','a') as f:
+        f.write(r'"工商银行":"'+html+'",')
+    print('工商银行：'+html)
+def jingdong1():
+    res = Request(url='https://search.jd.com/Search?keyword=%E9%87%91%E6%9D%A1&enc=utf-8', method='GET')
+    res.add_header('user-agent',
+                   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36')
+    html = urlopen(res).read().decode('utf-8')
+    soup=BeautifulSoup(html,'lxml')
+    title=soup.select('#J_goodsList > ul > li > div > div.p-name > a > em')
+    price = soup.select('#J_goodsList > ul > li > div > div.p-price > strong > i')
+    for i in range(3):
+        title_tmp=str(title[i]).replace('<em>','').replace(r'<font class="skcolor_ljg">','').replace(r'</font>','')
+        title_tmp=title_tmp.replace(r'</em>','').replace(' ','')
+        with open('D:\\data.txt', 'a') as f:
+            f.write(r'"京东金条":"' + '金条----'+title_tmp+'----'+str(price[i]).replace('<i>','').replace('</i>','')+'元' + '",')
+        print('金条----'+title_tmp+'----'+str(price[i]).replace('<i>','').replace('</i>','')+'元')
+def jingdong2():
+    res = Request(url='https://search.jd.com/Search?keyword=%E9%BB%84%E9%87%91%E9%A5%B0%E5%93%81&enc=utf-8', method='GET')
+    res.add_header('user-agent',
+                   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36')
+    html = urlopen(res).read().decode('utf-8')
+    soup=BeautifulSoup(html,'lxml')
+    title=soup.select('#J_goodsList > ul > li > div > div.p-name > a > em')
+    price = soup.select('#J_goodsList > ul > li > div > div.p-price > strong > i')
+    for i in range(3):
+        title_tmp=str(title[i]).replace('<em>','').replace(r'<font class="skcolor_ljg">','').replace(r'</font>','')
+        title_tmp=title_tmp.replace(r'</em>','').replace(' ','')
+        with open('D:\\data.txt', 'a') as f:
+            f.write(r'"京东黄金饰品":"' + '黄金饰品----'+title_tmp+'----'+str(price[i]).replace('<i>','').replace('</i>','')+'元' + '",')
+        print('黄金饰品----'+title_tmp+'----'+str(price[i]).replace('<i>','').replace('</i>','')+'元')
+    with open('D:\\data.txt', 'a') as f:
+        f.write(r'}')
+if __name__=='__main__':
+    shanghai()
+    gongshang()
+    jingdong1()
+    jingdong2()
